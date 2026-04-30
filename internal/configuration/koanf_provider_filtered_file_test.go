@@ -29,28 +29,23 @@ func TestNewFileFilters(t *testing.T) {
 		},
 		{
 			"ShouldErrorOnDuplicateFilterName",
-			[]string{"expand-env", "expand-env"},
-			"duplicate filter named 'expand-env'",
+			[]string{"template", "template"},
+			"duplicate filter named 'template'",
 		},
 		{
 			"ShouldErrorOnDuplicateFilterNameCaps",
-			[]string{"expand-ENV", "expand-env"},
-			"duplicate filter named 'expand-env'",
+			[]string{"TEMPLATE", "template"},
+			"duplicate filter named 'template'",
 		},
 		{
 			"ShouldNotErrorOnValidFilters",
-			[]string{"expand-env", "template"},
+			[]string{"template"},
 			"",
 		},
 		{
-			"ShouldNotErrorOnExpandEnvFilter",
+			"ShouldErrorOnExpandEnvFilter",
 			[]string{"expand-env"},
-			"",
-		},
-		{
-			"ShouldNotErrorOnExpandEnvFilterCaps",
-			[]string{"EXPAND-env"},
-			"",
+			"invalid filter named 'expand-env'",
 		},
 		{
 			"ShouldNotErrorOnTemplateFilter",
@@ -66,7 +61,7 @@ func TestNewFileFilters(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual, theError := NewFileFilters(tc.have)
+			actual, theError := NewFileFilters(tc.have, "", "")
 
 			switch tc.expect {
 			case "":
