@@ -105,7 +105,7 @@ $config['oauth_client_secret'] = 'insecure_secret';
 $config['oauth_auth_uri'] = 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/authorization';
 $config['oauth_token_uri'] = 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/token';
 $config['oauth_identity_uri'] = 'https://{{< sitevar name="subdomain-authelia" nojs="auth" >}}.{{< sitevar name="domain" nojs="example.com" >}}/api/oidc/userinfo';
-$config['oauth_identity_fields'] = ['email'];
+$config['oauth_identity_fields'] = ['preferred_username'];
 $config['oauth_scope'] = 'email openid profile';
 // Optionally, skip Roundcube's login page
 // $config['oauth_login_redirect'] = true;
@@ -135,13 +135,32 @@ Generally the configuration file is named `/etc/dovecot/dovecot.conf` or is one 
 `/etc/dovecot/conf.d/`.
 {{< /callout >}}
 
-```ext {title="/etc/dovecot/dovecot.conf"}
-auth_mechanisms = $auth_mechanisms oauthbearer xoauth2
+```ext {title="/etc/dovecot/conf.d/auth.conf"}
 
-passdb {
-  args = /etc/dovecot/dovecot-oauth2.conf.ext
-  driver = oauth2
-  mechanisms = xoauth2 oauthbearer
+auth_mechanisms {
+  oauthbearer = yes
+  xoauth2 = yes
+}
+
+oauth2 {
+  introspection_mode = post
+  introspection_url = https://roundcube:insecure_secret@auth.example.com/api/oidc/introspection
+  username_attribute = username
+  
+  active_attribute = active
+  active_value = true
+
+  ssl_client_ca_file = /etc/ssl/certs/ca-certificates.crt
+}
+
+passdb local_users {
+  driver = passwd-file
+  passwd_file_path = /etc/dovecot/users/users.passwd
+}
+
+userdb local_users {
+  driver = passwd-file
+  passwd_file_path = /etc/dovecot/users/users.passwd
 }
 
 # Optional for Postfix SASL on smtpd/submission
